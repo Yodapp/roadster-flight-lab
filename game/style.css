@@ -114,3 +114,5 @@ h2{margin:.2em 0 .3em;font-size:26px}
   .speed{bottom:40px}.speed b{font-size:56px}
 }
 body.kb .speed{bottom:40px}
+.gh{margin-left:auto;margin-right:10px;display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border:1px solid var(--line);border-radius:999px;color:var(--text);text-decoration:none;font-size:13px;font-weight:700}
+.gh:hover{background:#fff;color:#000}.gh-btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:var(--text)}.gh-line{text-align:center;margin:12px 0 0}
