@@ -13,12 +13,17 @@
 <link rel="modulepreload" href="grok/app.js">
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.min.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
+<style>
+.play-cta{display:flex;align-items:center;gap:14px;margin:18px 0 6px;padding:16px 20px;border-radius:18px;text-decoration:none;color:#fff;background:linear-gradient(120deg,#e0313f,#8e1020 60%,#3a0a12);box-shadow:0 10px 34px rgba(224,49,63,.45),inset 0 1px 0 rgba(255,255,255,.25);max-width:560px;transition:transform .15s,box-shadow .15s}
+.play-cta:hover,.play-cta:focus-visible{transform:translateY(-2px);box-shadow:0 14px 40px rgba(224,49,63,.6)}
+.play-cta .pc-ico{font-size:34px}.play-cta b{display:block;font-size:clamp(18px,4.6vw,22px);letter-spacing:-.01em}.play-cta small{display:block;opacity:.85;font-size:13.5px;margin-top:2px}.play-cta .pc-arrow{margin-left:auto;font-size:26px}
+</style>
 </head>
 <body>
 <header class="top">
   <a class="brand" href="#verdict"><span class="logo">G</span><span><b>Roadster Flight Lab</b><small data-i18n="brand.sub">Grok-versionen av Roadster Flight Lab</small></span></a>
   <nav class="links">
-    <a href="#stunts" data-i18n="nav.stunts">Stunts</a><a href="#gauge" data-i18n="nav.gauge">Impulsbudget</a><a href="#claims" data-i18n="nav.claims">Påståenden</a><a href="#lab" data-i18n="nav.lab">Simulatorn</a><a href="#sources" data-i18n="nav.sources">Källor</a>
+    <a href="#stunts" data-i18n="nav.stunts">Stunts</a><a href="#gauge" data-i18n="nav.gauge">Impulsbudget</a><a href="#claims" data-i18n="nav.claims">Påståenden</a><a href="#lab" data-i18n="nav.lab">Simulatorn</a><a href="#sources" data-i18n="nav.sources">Källor</a><a href="game/" data-i18n="nav.play">🕹️ Spela</a>
   </nav>
   <div class="lang" role="group" aria-label="Language"><button data-lang="sv" aria-pressed="true">SV</button><button data-lang="en" aria-pressed="false">EN</button></div>
 </header>
@@ -28,6 +33,7 @@
   <p class="kicker" data-i18n="hero.kicker">Grok-analys · oberoende fysikgranskning</p>
   <h1 data-i18n="hero.title">Äkta demo. Äkta stunt.<br><em>Inte äkta flygning.</em></h1>
   <p class="lead" data-i18n="hero.lead"></p>
+  <a class="play-cta" href="game/"><span class="pc-ico" aria-hidden="true">🕹️</span><span><b data-i18n="hero.play">Sätt dig vid ratten – spela</b><small data-i18n="hero.playSub">Mobilspel: styr, tajma och landa själv med 250 kg luft</small></span><span class="pc-arrow" aria-hidden="true">→</span></a>
   <div class="keys">
     <div class="key"><b id="k-p">437 bar</b><span data-i18n="k.p.label"></span></div>
     <div class="key"><b id="k-i">≈ 90 kN·s</b><span data-i18n="k.i.label"></span></div>

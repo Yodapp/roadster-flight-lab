@@ -1,7 +1,8 @@
 # Grok fork: "Real demo, real stunt, not real flight"
 
 **Live site:** https://yodapp.github.io/roadster-flight-lab/ (Swedish first, English toggle)  
-**Anders' full simulator, Grok-tuned:** https://yodapp.github.io/roadster-flight-lab/dist/
+**Anders' full simulator, Grok-tuned:** https://yodapp.github.io/roadster-flight-lab/dist/  
+**Game – "Sätt dig vid ratten":** https://yodapp.github.io/roadster-flight-lab/game/
 
 ## Credits and permission
 
@@ -11,6 +12,22 @@ The original **Roadster Flight Lab** was created by **Anders Bjarby**:
 - Live site: https://bjarby.com/roadster/
 
 This fork is modified and published **with Anders' permission**. He confirmed this in writing ("helt ok"). The original repository has no license file, and this fork **does not add one on his behalf**. All rights to the original work remain with Anders Bjarby.
+
+## The game: "Sätt dig vid ratten" (`game/`)
+
+A mobile-first three.js game (no build step, three@0.170.0 from jsDelivr) where you drive the four demo stunts yourself:
+0–60 mph with jet timing, the loop ramp (suction, release inverted, roll upright, land), the kickflip over a row of
+stylized Cybercab/Cybertruck/Semi/Model Y/Model 3 shapes (no logos), and a vertical hop with a corkscrew. Plus free drive.
+
+* `game/sim.js` – pure, node-testable physics: 250 kg tank / ≈ 90 kN·s usable impulse (same `grok/physics.js`
+  blowdown tables as the analysis), 80 kN rear jets, 60 kN lift jets, attitude thrusters, fan suction ≈ 2 g,
+  loop-ramp normal force with detachment, landing judged on vertical speed, tilt and side speed.
+* `game/levels.js` – level rules, star ratings and best scores (localStorage).
+* `game/main.js`, `car.js`, `world.js`, `fx.js`, `audio.js`, `strings.js` – rendering (PBR, environment map, bloom,
+  adaptive quality), cockpit/chase cameras, touch + keyboard controls, synthesized WebAudio, haptics, SV/EN.
+* `tests/game-physics.test.mjs` – the levels are beatable, fans matter, air runs out, scores persist.
+
+The game uses our physics estimates, not Tesla data. Built on Anders Bjarby's Roadster Flight Lab with his permission.
 
 ## What this fork adds
 

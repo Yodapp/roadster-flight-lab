@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#05070d">
+<title>Sätt dig vid ratten · Roadster-stunts (Grok-versionen)</title>
+<meta name="description" content="Mobilspel: kör Roadster-stunten själv – 0–60 mph, loopramp, kickflip och hopp – med 250 kg luft. Byggt på Grok-versionens fysik och Anders Bjarbys Roadster Flight Lab.">
+<link rel="icon" href="../dist/icon.svg">
+<link rel="stylesheet" href="style.css">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
+<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js" crossorigin>
+<link rel="modulepreload" href="main.js">
+</head>
+<body>
+<canvas id="gl" aria-label="3D"></canvas>
+<canvas id="lines" aria-hidden="true"></canvas>
+<div id="vignette" aria-hidden="true"></div>
+<div id="flash" aria-hidden="true"></div>
+
+<div id="hud" hidden>
+  <div class="hud-top">
+    <button id="b-pause" class="ico" aria-label="Paus">❚❚</button>
+    <div class="lvl"><b id="h-level"></b><span id="h-clock"></span></div>
+    <button id="b-cam" class="ico" aria-label="Kamera">◉</button>
+  </div>
+  <div class="hud-left">
+    <div class="g-air" title="Luft">
+      <svg viewBox="0 0 100 100" aria-hidden="true"><circle class="trk" cx="50" cy="50" r="42"/><circle id="h-reserve" class="res" cx="50" cy="50" r="42"/><circle id="h-airarc" class="arc" cx="50" cy="50" r="42"/></svg>
+      <div class="g-air-txt"><b id="h-kg">250</b><small>kg <span data-t="air">LUFT</span></small><small id="h-bar">437 bar</small></div>
+    </div>
+    <div class="meter" id="m-suck"><span data-t="suction">SUG</span><div class="bar"><i id="h-suck"></i></div></div>
+    <div class="meter" id="m-grip" hidden><span data-t="grip">GREPP</span><div class="bar"><i id="h-grip"></i></div></div>
+  </div>
+  <div class="hud-right">
+    <canvas id="adi" width="132" height="132" aria-hidden="true"></canvas>
+    <div class="alt"><span data-t="alt">HÖJD</span><b id="h-alt">0,0</b><span data-t="vs">V-FART</span><b id="h-vs">0,0</b></div>
+  </div>
+  <div class="speed"><b id="h-speed">0</b><span data-t="speed">km/h</span></div>
+  <div id="cue" aria-live="polite"></div>
+  <div id="toast"></div>
+  <div id="tree" hidden><i></i><i></i><i></i><i></i><i></i></div>
+  <div id="bigtime" hidden></div>
+</div>
+
+<div id="controls" hidden>
+  <div class="cl">
+    <div class="yaw" id="yaw"><button data-k="yawL" aria-label="Gira vänster">⟲</button><button data-k="yawR" aria-label="Gira höger">⟳</button></div>
+    <div class="stick" id="stick"><div class="knob" id="knob"></div><span class="stick-hint" id="stick-hint">◄ ►</span></div>
+  </div>
+  <div class="cr">
+    <div class="row top"><button id="b-fan" class="pill" aria-pressed="false"><span data-t="fan">FLÄKT</span></button><button id="b-refill" class="pill" hidden>⛽ <span data-t="refill">Fyll</span></button></div>
+    <div class="row"><button data-k="boost" class="big boost"><span data-t="boost">BOOST</span><small>80 kN</small></button><button data-k="lift" class="big lift" id="b-lift"><span id="lift-label" data-t="lift">LYFT</span><small>60 kN</small></button></div>
+    <div class="row"><button data-k="brake" class="pedal brake"><span data-t="brake">BROMS</span></button><button data-k="gas" class="pedal gas"><span data-t="gas">GAS</span></button></div>
+  </div>
+</div>
+
+<section id="menu" class="overlay">
+  <div class="menu-card">
+    <div class="menu-head">
+      <a class="back" href="../" data-t="back">← Analysen</a>
+      <div class="lang" role="group" aria-label="Språk"><button data-lang="sv" aria-pressed="true">SV</button><button data-lang="en" aria-pressed="false">EN</button></div>
+    </div>
+    <p class="kick">GROK-VERSIONEN · ROADSTER</p>
+    <h1 data-t="title">Sätt dig vid ratten</h1>
+    <p class="tag" data-t="tagline"></p>
+    <div id="levels" class="levels"></div>
+    <div class="menu-row">
+      <button id="b-sandbox" class="btn ghost" data-t="sandbox">Fri körning</button>
+      <button id="b-sound" class="btn ghost" aria-pressed="true">🔊 <span data-t="sound">Ljud</span></button>
+      <button id="b-assist" class="btn ghost" aria-pressed="true">🛞 <span data-t="assist">Stabilisering</span>: <span id="assist-label">på</span></button>
+      <button id="b-quality" class="btn ghost">⚙ <span data-t="quality">Grafik</span>: <span id="q-label">Auto</span></button>
+    </div>
+    <p class="keys" data-t="keys"></p>
+    <p class="note" data-t="note"></p>
+    <p class="credit" data-t="credit"></p>
+  </div>
+</section>
+
+<section id="tut" class="overlay" hidden>
+  <div class="card">
+    <p class="kick" id="tut-kick"></p>
+    <h2 id="tut-title"></h2>
+    <p id="tut-text"></p>
+    <ul class="stars-list" id="tut-stars"></ul>
+    <div class="menu-row"><button id="b-go" class="btn primary" data-t="start">Kör!</button><button class="btn ghost" data-act="menu" data-t="menu">Meny</button></div>
+  </div>
+</section>
+
+<section id="result" class="overlay" hidden>
+  <div class="card">
+    <p class="kick" id="res-kick"></p>
+    <h2 id="res-title"></h2>
+    <div class="stars" id="res-stars"><i>★</i><i>★</i><i>★</i></div>
+    <p id="res-reason" class="reason"></p>
+    <dl id="res-metrics" class="metrics"></dl>
+    <p id="res-best" class="best"></p>
+    <p id="res-fact" class="fact" hidden></p>
+    <div class="menu-row"><button id="b-retry" class="btn primary" data-t="retry">Igen</button><button id="b-next" class="btn ghost" data-t="next">Nästa</button><button class="btn ghost" data-act="menu" data-t="menu">Meny</button></div>
+  </div>
+</section>
+
+<section id="pause" class="overlay" hidden>
+  <div class="card small">
+    <h2 data-t="paused">Paus</h2>
+    <div class="menu-row"><button id="b-resume" class="btn primary" data-t="resume">Fortsätt</button><button id="b-restart" class="btn ghost" data-t="retry">Igen</button><button class="btn ghost" data-act="menu" data-t="menu">Meny</button></div>
+  </div>
+</section>
+
+<div id="loading"><div class="spin"></div><span data-t="loading">Laddar 3D…</span></div>
+<noscript><p style="padding:20px;color:#fff">Spelet kräver JavaScript och WebGL.</p></noscript>
+<script type="module" src="main.js"></script>
+</body>
+</html>
