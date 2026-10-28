@@ -1,0 +1,101 @@
+{
+  "kind": "Fixed-state reference EOS comparison; not a reference-EOS flight",
+  "provenance": {
+    "CoolProp_version": "8.0.0",
+    "CoolProp_git_revision": "ae81610e7d23efc57f9d051c8e70a4d66e87537f",
+    "backend": "HEOS::Nitrogen",
+    "reference_equation": "Span, Lemmon, Jacobsen, Wagner and Yokozeki (2000)",
+    "reference_doi": "https://doi.org/10.1063/1.1349047",
+    "nitrogen_documentation": "https://coolprop.org/fluid_properties/fluids/Nitrogen.html",
+    "API_documentation": "https://coolprop.org/coolprop/HighLevelAPI.html",
+    "hardware_source_sha256": "0f0c62fe2fbcd2f7cb19b2c469df9c41218ad22a88aa844f9cc793a724e722a1",
+    "pr_values": "Current gasState output, with an additional fixed-pressure isenthalpic solve using exported nitrogenPR for the regulator comparison."
+  },
+  "fixed_inputs": {
+    "initial_gas_kg": 250.0,
+    "tank_volume_m3": 0.6,
+    "initial_temperature_K": 293.15,
+    "initial_density_kg_m3": 416.6666666666667,
+    "critical_density_kg_m3": 313.29999997632996,
+    "density_over_critical": 1.3299287159213091,
+    "reference_initial_entropy_J_kgK": 4796.113643407358
+  },
+  "fill_states": [
+    {
+      "temperature_C": 20.0,
+      "reference_pressure_bar": 492.47475898503603,
+      "pr_pressure_bar": 440.595429504288,
+      "pressure_error_percent": -10.534413903297002,
+      "reference_Z": 1.3584251775191578,
+      "pr_Z": 1.2153299725684967
+    },
+    {
+      "temperature_C": 40.0,
+      "reference_pressure_bar": 545.523606326108,
+      "pr_pressure_bar": 486.04964606849194,
+      "pressure_error_percent": -10.902179038254712,
+      "reference_Z": 1.408648953487227,
+      "pr_Z": 1.255082674912564
+    }
+  ],
+  "isentropic_states": [
+    {
+      "gas_remaining_kg": 130,
+      "density_kg_m3": 216.66666666666669,
+      "reference_temperature_C": -81.87736542877226,
+      "pr_temperature_C": -73.57070057358266,
+      "temperature_error_K": 8.30666485518961,
+      "reference_pressure_bar": 99.61183901901654,
+      "pr_pressure_bar": 105.27401639443265,
+      "pressure_error_percent": 5.684241382527988,
+      "reference_phase": "supercritical"
+    },
+    {
+      "gas_remaining_kg": 117,
+      "density_kg_m3": 195.0,
+      "reference_temperature_C": -92.4964144217987,
+      "pr_temperature_C": -84.52614917805991,
+      "temperature_error_K": 7.970265243738794,
+      "reference_pressure_bar": 81.39531797888036,
+      "pr_pressure_bar": 86.19606672863647,
+      "pressure_error_percent": 5.898064985754781,
+      "reference_phase": "supercritical"
+    },
+    {
+      "gas_remaining_kg": 90,
+      "density_kg_m3": 150.0,
+      "reference_temperature_C": -115.0895922063437,
+      "pr_temperature_C": -108.54264055419429,
+      "temperature_error_K": 6.546951652149403,
+      "reference_pressure_bar": 51.30449046613937,
+      "pr_pressure_bar": 53.9346078061419,
+      "pressure_error_percent": 5.126485646979351,
+      "reference_phase": "supercritical"
+    }
+  ],
+  "regulator_at_117kg": {
+    "outlet_pressure_bar": 79.3,
+    "reference_temperature_C": -93.23835465768661,
+    "pr_temperature_C": -86.81021410828066,
+    "temperature_error_K": 6.428140549405953
+  },
+  "isothermal_fill_heat_per_kg": {
+    "reference_kJ_kg": 187.45077350940522,
+    "pr_kJ_kg": 160.6693167952578,
+    "error_percent": -14.287194559271155
+  },
+  "nominal_100bar_boundary": {
+    "reference_remaining_kg": 130.25661709510268,
+    "pr_remaining_kg": 126.57136023547005,
+    "reference_inventory_above_boundary_kg": 119.74338290489732,
+    "pr_inventory_above_boundary_kg": 123.42863976452995,
+    "qualification": "Inventory above this pressure is not a guarantee of full thrust; nozzle, shared feed, loss and temperature constraints also apply."
+  },
+  "ideal_air_fill_pressure_bar": 350.61961458333326,
+  "limitations": [
+    "This compares matched state constraints. It does not integrate a flight with reference nitrogen properties, so it cannot establish reference-EOS touchdown speed, gas used, or minimum temperature along a changed trajectory.",
+    "No blanket temperature or pressure correction is applied. Error varies with initial temperature, density, remaining mass and thermodynamic path.",
+    "The sampled 250 kg / 600 L isentrope is not sufficient for the full UI range of initial gas mass, tank volume, temperature, regulator pressure and loss.",
+    "A reference table must cover and validate the multidimensional state domain, phase handling and interpolation before it replaces the browser EOS."
+  ]
+}

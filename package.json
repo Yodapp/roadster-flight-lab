@@ -1,0 +1,13 @@
+{
+  "name": "roadster-flight-lab",
+  "version": "4.4.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "python3 -m http.server 4173 --bind 127.0.0.1 --directory dist",
+    "test": "node --test tests/*.test.mjs",
+    "check": "node --check dist/physics.js && node --check dist/hardware.js && node --check dist/flight3d.js && node --check dist/app.js && node --check dist/map-worker.js && node --check dist/sensitivity.js && node --check dist/ramp.js && node --check dist/stunt.js && node --check dist/math-explainer.js && node --check dist/envelope-map.js && node --check dist/reference-eos.js && node --check dist/replay-renderer.js && node --check dist/replay-state.js",
+    "standalone": "python3 scripts/build-standalone.py",
+    "audit-model": "node scripts/audit-model.mjs"
+  }
+}

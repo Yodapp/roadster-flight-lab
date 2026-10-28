@@ -1,0 +1,484 @@
+{
+  "kind": "Actual flight gasState path checked against direct CoolProp HEOS",
+  "provenance": {
+    "CoolProp_version": "8.0.0",
+    "CoolProp_git_revision": "ae81610e7d23efc57f9d051c8e70a4d66e87537f",
+    "backend": "HEOS::Nitrogen",
+    "source_sha256": {
+      "dist/hardware.js": "28283fb259f8e1a0b573d920bb8a4ff67082c05f0f55944ef15ace7f4242c646",
+      "dist/reference-eos.js": "98b1cc853961c5703411a196f8176e0d8a6679b7ec47a6da6c5b407f23dfb5e3",
+      "dist/reference-eos-tables.json": "f92433e7d40e7c66fdad32a5cc65d609623c2a400fe38e030f4d06dd70cfea55",
+      "dist/flight3d.js": "66f7beca463452e080b14f738bfa5e30c8c54e4db4dc2965a5d4b160d13d5b6b",
+      "dist/physics.js": "56f9d6017803fec78853976878727100c91401eeb2b661d43d008b22e25a0d49",
+      "scripts/verify-flight-eos.py": "cabf6c18fb0ef38d85d46c66bb4c9fd839e9394462d1ed01875b96ec4082fb3e"
+    }
+  },
+  "criteria": {
+    "tank_temperature_absolute_error_K": "<1",
+    "regulator_temperature_absolute_error_K": "<1",
+    "pressure_absolute_relative_error_percent": "<1",
+    "isothermal_heat_absolute_relative_error_percent": "<1",
+    "accepted_reference_liquid_or_two_phase_states": 0
+  },
+  "runs": [
+    {
+      "name": "reviewedBaseline",
+      "inputs": {
+        "gasModel": "reference",
+        "feedModel": "consistent",
+        "headingMode": "release",
+        "gas": 250,
+        "tankVolume": 600,
+        "ambientTemperature": 20,
+        "regulatorBar": 100,
+        "deliveryLossPercent": 8,
+        "blowdown": true
+      },
+      "reference_initial_entropy_J_kgK": 4796.113643407358,
+      "sample_count": 133,
+      "accepted_samples": 133,
+      "flowing_samples": 132,
+      "rejection_counts": {
+        "runtime_phase": 0,
+        "runtime_domain": 0,
+        "reference_phase": 0,
+        "reference_error": 0
+      },
+      "reference_phase_counts": {
+        "supercritical": 266
+      },
+      "maximum_absolute_errors": {
+        "tank_temperature_K": {
+          "absolute_error": 0.007409931434551709,
+          "signed_error": -0.007409931434551709,
+          "gas_remaining_kg": 240.3842589327419,
+          "time_s": 8.934781355473824,
+          "model": 284.3767633293028,
+          "reference": 284.3841732607373
+        },
+        "pressure_percent": {
+          "absolute_error": 0.032199287481082806,
+          "signed_error": 0.032199287481082806,
+          "gas_remaining_kg": 246.93223879757983,
+          "time_s": 8.772781355473823,
+          "model": 47463948.50797493,
+          "reference": 47448670.37419519
+        },
+        "regulator_temperature_K": {
+          "absolute_error": 0.01595280958889589,
+          "signed_error": 0.01595280958889589,
+          "gas_remaining_kg": 246.93223879757983,
+          "time_s": 8.772781355473823,
+          "model": 271.52576740304306,
+          "reference": 271.50981459345417
+        },
+        "feed_pressure_percent": {
+          "absolute_error": 0.011141803846070886,
+          "signed_error": 0.011141803846070886,
+          "gas_remaining_kg": 127.33024250704437,
+          "time_s": 10.860781355473794,
+          "model": 8800034.851865942,
+          "reference": 8799054.478475641
+        },
+        "isothermal_heat_percent": null
+      },
+      "flight_result": {
+        "contactVerticalSpeed_m_s": 1.6587752043558688,
+        "gasUsed_kg": 142.97625838201895,
+        "minimumTankTemperature_K": 172.41863719139698,
+        "minimumFeedTemperature_K": 170.02873047713476,
+        "thermalFits": false,
+        "soft": false,
+        "candidate": false,
+        "phaseLimited": false,
+        "eosInvalidState": false
+      }
+    },
+    {
+      "name": "demoOrientation",
+      "inputs": {
+        "gasModel": "reference",
+        "feedModel": "consistent",
+        "headingMode": "outbound",
+        "gas": 250,
+        "tankVolume": 600,
+        "ambientTemperature": 20,
+        "regulatorBar": 100,
+        "deliveryLossPercent": 8,
+        "blowdown": true
+      },
+      "reference_initial_entropy_J_kgK": 4796.113643407358,
+      "sample_count": 144,
+      "accepted_samples": 144,
+      "flowing_samples": 143,
+      "rejection_counts": {
+        "runtime_phase": 0,
+        "runtime_domain": 0,
+        "reference_phase": 0,
+        "reference_error": 0
+      },
+      "reference_phase_counts": {
+        "supercritical": 288
+      },
+      "maximum_absolute_errors": {
+        "tank_temperature_K": {
+          "absolute_error": 0.00819590525179592,
+          "signed_error": -0.00819590525179592,
+          "gas_remaining_kg": 220.9892789208341,
+          "time_s": 10.176781355473807,
+          "model": 267.1075431218083,
+          "reference": 267.1157390270601
+        },
+        "pressure_percent": {
+          "absolute_error": 0.032596656532279944,
+          "signed_error": 0.032596656532279944,
+          "gas_remaining_kg": 246.74925433764645,
+          "time_s": 8.808781355473823,
+          "model": 47358681.22907671,
+          "reference": 47343248.91283737
+        },
+        "regulator_temperature_K": {
+          "absolute_error": 0.016069287389541387,
+          "signed_error": 0.016069287389541387,
+          "gas_remaining_kg": 246.74925433764645,
+          "time_s": 8.808781355473823,
+          "model": 271.31754929319084,
+          "reference": 271.3014800058013
+        },
+        "feed_pressure_percent": {
+          "absolute_error": 0.009381044224054946,
+          "signed_error": 0.009381044224054946,
+          "gas_remaining_kg": 121.60369248379816,
+          "time_s": 11.202781355473807,
+          "model": 8053778.571685105,
+          "reference": 8053023.114025405
+        },
+        "isothermal_heat_percent": null
+      },
+      "flight_result": {
+        "contactVerticalSpeed_m_s": 0.7911962325010792,
+        "gasUsed_kg": 133.86408616246587,
+        "minimumTankTemperature_K": 179.9422514272613,
+        "minimumFeedTemperature_K": 177.57450307464288,
+        "thermalFits": false,
+        "soft": false,
+        "candidate": false,
+        "phaseLimited": false,
+        "eosInvalidState": false
+      }
+    },
+    {
+      "name": "ambientPlus15",
+      "inputs": {
+        "gasModel": "reference",
+        "feedModel": "consistent",
+        "headingMode": "release",
+        "gas": 250,
+        "tankVolume": 600,
+        "ambientTemperature": 35,
+        "regulatorBar": 100,
+        "deliveryLossPercent": 8,
+        "blowdown": true
+      },
+      "reference_initial_entropy_J_kgK": 4836.794451916562,
+      "sample_count": 134,
+      "accepted_samples": 134,
+      "flowing_samples": 133,
+      "rejection_counts": {
+        "runtime_phase": 0,
+        "runtime_domain": 0,
+        "reference_phase": 0,
+        "reference_error": 0
+      },
+      "reference_phase_counts": {
+        "supercritical": 268
+      },
+      "maximum_absolute_errors": {
+        "tank_temperature_K": {
+          "absolute_error": 0.00889789607123248,
+          "signed_error": -0.00889789607123248,
+          "gas_remaining_kg": 236.4180838476824,
+          "time_s": 9.042781355473823,
+          "model": 295.2259019790934,
+          "reference": 295.23479987516464
+        },
+        "pressure_percent": {
+          "absolute_error": 0.031056006631913213,
+          "signed_error": 0.031056006631913213,
+          "gas_remaining_kg": 246.32750789198982,
+          "time_s": 8.790781355473824,
+          "model": 50960631.34917505,
+          "reference": 50944809.92562593
+        },
+        "regulator_temperature_K": {
+          "absolute_error": 0.016284592694375988,
+          "signed_error": 0.016284592694375988,
+          "gas_remaining_kg": 246.32750789198982,
+          "time_s": 8.790781355473824,
+          "model": 288.49704986963087,
+          "reference": 288.4807652769365
+        },
+        "feed_pressure_percent": {
+          "absolute_error": 0.008402109100558164,
+          "signed_error": 0.008402109100558164,
+          "gas_remaining_kg": 114.18981511532115,
+          "time_s": 11.0047813554738,
+          "model": 7847530.643138796,
+          "reference": 7846871.340447791
+        },
+        "isothermal_heat_percent": null
+      },
+      "flight_result": {
+        "contactVerticalSpeed_m_s": 1.0421171456588647,
+        "gasUsed_kg": 143.16977614696157,
+        "minimumTankTemperature_K": 180.92387034423425,
+        "minimumFeedTemperature_K": 178.6009787844028,
+        "thermalFits": false,
+        "soft": true,
+        "candidate": false,
+        "phaseLimited": false,
+        "eosInvalidState": false
+      }
+    },
+    {
+      "name": "deliveryLossPlus8",
+      "inputs": {
+        "gasModel": "reference",
+        "feedModel": "consistent",
+        "headingMode": "release",
+        "gas": 250,
+        "tankVolume": 600,
+        "ambientTemperature": 20,
+        "regulatorBar": 100,
+        "deliveryLossPercent": 16,
+        "blowdown": true
+      },
+      "reference_initial_entropy_J_kgK": 4796.113643407358,
+      "sample_count": 133,
+      "accepted_samples": 133,
+      "flowing_samples": 132,
+      "rejection_counts": {
+        "runtime_phase": 0,
+        "runtime_domain": 0,
+        "reference_phase": 0,
+        "reference_error": 0
+      },
+      "reference_phase_counts": {
+        "supercritical": 266
+      },
+      "maximum_absolute_errors": {
+        "tank_temperature_K": {
+          "absolute_error": 0.0075750347166945176,
+          "signed_error": -0.0075750347166945176,
+          "gas_remaining_kg": 240.357864573609,
+          "time_s": 8.934781355473824,
+          "model": 284.35272916917864,
+          "reference": 284.36030420389534
+        },
+        "pressure_percent": {
+          "absolute_error": 0.03222595442458065,
+          "signed_error": 0.03222595442458065,
+          "gas_remaining_kg": 246.92420013997625,
+          "time_s": 8.772781355473823,
+          "model": 47459324.029960625,
+          "reference": 47444034.736949116
+        },
+        "regulator_temperature_K": {
+          "absolute_error": 0.018406706417238183,
+          "signed_error": 0.018406706417238183,
+          "gas_remaining_kg": 246.92420013997625,
+          "time_s": 8.772781355473823,
+          "model": 270.0745330716035,
+          "reference": 270.0561263651863
+        },
+        "feed_pressure_percent": {
+          "absolute_error": 0.021408908583153696,
+          "signed_error": -0.021408908583153696,
+          "gas_remaining_kg": 130.98168165831666,
+          "time_s": 10.824781355473792,
+          "model": 8398201.651679015,
+          "reference": 8400000.0
+        },
+        "isothermal_heat_percent": null
+      },
+      "flight_result": {
+        "contactVerticalSpeed_m_s": 1.7274240743069256,
+        "gasUsed_kg": 143.30470630641454,
+        "minimumTankTemperature_K": 172.14594219630348,
+        "minimumFeedTemperature_K": 167.17051644178702,
+        "thermalFits": false,
+        "soft": false,
+        "candidate": false,
+        "phaseLimited": false,
+        "eosInvalidState": false
+      }
+    },
+    {
+      "name": "isothermalControl",
+      "inputs": {
+        "gasModel": "reference",
+        "feedModel": "consistent",
+        "headingMode": "world",
+        "gas": 250,
+        "tankVolume": 600,
+        "ambientTemperature": 20,
+        "regulatorBar": 100,
+        "deliveryLossPercent": 8,
+        "blowdown": false
+      },
+      "reference_initial_entropy_J_kgK": 4796.113643407358,
+      "sample_count": 73,
+      "accepted_samples": 73,
+      "flowing_samples": 31,
+      "rejection_counts": {
+        "runtime_phase": 0,
+        "runtime_domain": 0,
+        "reference_phase": 0,
+        "reference_error": 0
+      },
+      "reference_phase_counts": {
+        "supercritical": 146
+      },
+      "maximum_absolute_errors": {
+        "tank_temperature_K": {
+          "absolute_error": 0.0,
+          "signed_error": 0.0,
+          "gas_remaining_kg": 250,
+          "time_s": 0,
+          "model": 293.15,
+          "reference": 293.15
+        },
+        "pressure_percent": {
+          "absolute_error": 0.02987770787059585,
+          "signed_error": 0.02987770787059585,
+          "gas_remaining_kg": 242.58605227901936,
+          "time_s": 0.8460000000000006,
+          "model": 46725542.654221125,
+          "reference": 46711586.30292382
+        },
+        "regulator_temperature_K": {
+          "absolute_error": 0.013243589638875619,
+          "signed_error": 0.013243589638875619,
+          "gas_remaining_kg": 242.58605227901936,
+          "time_s": 0.8460000000000006,
+          "model": 274.57282677032464,
+          "reference": 274.55958318068576
+        },
+        "feed_pressure_percent": {
+          "absolute_error": 0.0,
+          "signed_error": 0.0,
+          "gas_remaining_kg": 250,
+          "time_s": 0,
+          "model": 9200000,
+          "reference": 9200000.0
+        },
+        "isothermal_heat_percent": {
+          "absolute_error": 0.0066554695170806255,
+          "signed_error": 0.0066554695170806255,
+          "gas_remaining_kg": 242.58605227901936,
+          "time_s": 0.8460000000000006,
+          "model": 182980.48128899417,
+          "reference": 182968.30388930292
+        }
+      },
+      "flight_result": {
+        "contactVerticalSpeed_m_s": 0.6043181964081266,
+        "gasUsed_kg": 49.09225620727315,
+        "minimumTankTemperature_K": 293.15,
+        "minimumFeedTemperature_K": 273.89557151983945,
+        "thermalFits": true,
+        "soft": true,
+        "candidate": true,
+        "phaseLimited": false,
+        "eosInvalidState": false
+      }
+    },
+    {
+      "name": "regulator60",
+      "inputs": {
+        "gasModel": "reference",
+        "feedModel": "consistent",
+        "headingMode": "release",
+        "gas": 250,
+        "tankVolume": 600,
+        "ambientTemperature": 20,
+        "regulatorBar": 60,
+        "deliveryLossPercent": 8,
+        "blowdown": true
+      },
+      "reference_initial_entropy_J_kgK": 4796.113643407358,
+      "sample_count": 134,
+      "accepted_samples": 134,
+      "flowing_samples": 133,
+      "rejection_counts": {
+        "runtime_phase": 0,
+        "runtime_domain": 0,
+        "reference_phase": 0,
+        "reference_error": 0
+      },
+      "reference_phase_counts": {
+        "supercritical": 268
+      },
+      "maximum_absolute_errors": {
+        "tank_temperature_K": {
+          "absolute_error": 0.00851004831474711,
+          "signed_error": -0.00851004831474711,
+          "gas_remaining_kg": 236.52227611903868,
+          "time_s": 9.024781355473824,
+          "model": 280.8941502613647,
+          "reference": 280.90266030967945
+        },
+        "pressure_percent": {
+          "absolute_error": 0.03232781585975619,
+          "signed_error": 0.03232781585975619,
+          "gas_remaining_kg": 246.890759462367,
+          "time_s": 8.772781355473823,
+          "model": 47440086.28082213,
+          "reference": 47424754.89338825
+        },
+        "regulator_temperature_K": {
+          "absolute_error": 0.01629701427435748,
+          "signed_error": 0.01629701427435748,
+          "gas_remaining_kg": 246.890759462367,
+          "time_s": 8.772781355473823,
+          "model": 264.15176304876707,
+          "reference": 264.1354660344927
+        },
+        "feed_pressure_percent": {
+          "absolute_error": 0.0,
+          "signed_error": 0.0,
+          "gas_remaining_kg": 250,
+          "time_s": 8.682781355473823,
+          "model": 5520000,
+          "reference": 5520000.0
+        },
+        "isothermal_heat_percent": null
+      },
+      "flight_result": {
+        "contactVerticalSpeed_m_s": 1.2755380511554708,
+        "gasUsed_kg": 149.4976789968399,
+        "minimumTankTemperature_K": 166.97494916638811,
+        "minimumFeedTemperature_K": 163.68856569557047,
+        "thermalFits": false,
+        "soft": true,
+        "candidate": false,
+        "phaseLimited": false,
+        "eosInvalidState": false
+      }
+    }
+  ],
+  "delivery_loss_regression": {
+    "baseline_case": "reviewedBaseline",
+    "baseline_downward_speed_m_s": 1.6587752043558688,
+    "plus8pp_downward_speed_m_s": 1.7274240743069256,
+    "lands_harder": true
+  },
+  "passed": true,
+  "failures": [],
+  "limitations": [
+    "These are stored flight samples plus the exact final point, not every integration substep.",
+    "This validates gas properties along the computed paths, not a second independently integrated trajectory.",
+    "No claim about real nozzle, valve, manifold, wall heat transfer, component temperature ratings or vehicle qualification follows from EOS interpolation accuracy.",
+    "In version4.3, the hydraulic pressure solve retains temperature/exhaust at the delivery-pressure ceiling; these checks validate that stated property approximation, not temperature at the lower solved manifold pressure."
+  ]
+}

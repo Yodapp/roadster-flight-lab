@@ -1,0 +1,407 @@
+{
+  "kind": "Direct CoolProp validation of the shipped JavaScript lookup at every cell midpoint, seeded random off-grid points and UI/trajectory states",
+  "provenance": {
+    "schema": 1,
+    "fluid": "Nitrogen",
+    "backend": "HEOS",
+    "CoolPropVersion": "8.0.0",
+    "CoolPropGitRevision": "ae81610e7d23efc57f9d051c8e70a4d66e87537f",
+    "gasConstant": 296.80389583871766,
+    "referenceEquation": "Span, Lemmon, Jacobsen, Wagner and Yokozeki (2000)",
+    "referenceDOI": "https://doi.org/10.1063/1.1349047",
+    "documentation": "https://coolprop.org/fluid_properties/fluids/Nitrogen.html",
+    "interpolation": "Bilinear in (specific entropy, log density) and (specific enthalpy, log absolute pressure). No extrapolation.",
+    "units": {
+      "entropy": "J/(kg K)",
+      "density": "kg/m\u00b3",
+      "temperature": "K",
+      "pressure": "Pa",
+      "enthalpy": "J/kg",
+      "heatPerKg": "J/kg"
+    },
+    "domain": {
+      "entropy_J_kgK": [
+        3800.0,
+        6300.0
+      ],
+      "density_kg_m3": [
+        0.1,
+        1000
+      ],
+      "enthalpy_J_kg": [
+        -150000.0,
+        700000.0
+      ],
+      "pressure_Pa": [
+        20000,
+        100000000
+      ]
+    },
+    "phaseFlags": {
+      "0": "gas or supercritical single phase",
+      "1": "saturation/two-phase/liquid; stop gas thrust",
+      "2": "invalid, solid-region or EOS/domain failure; stop gas thrust"
+    },
+    "cellPolicy": "Reject a cell if any contributing vertex has nonzero phase flag. Liquid and ambiguous boundary cells are conservatively excluded.",
+    "generationScript": "scripts/build-reference-tables.py",
+    "validity": "Lookup accuracy is measured against direct HEOS in reference-eos-validation.json. This is not a certified thermal/component model."
+  },
+  "tableSha256": "f92433e7d40e7c66fdad32a5cc65d609623c2a400fe38e030f4d06dd70cfea55",
+  "seed": 4202026,
+  "summary": {
+    "srho/cell-centres": {
+      "queries": 27000,
+      "accepted": 17228,
+      "phaseRejected": 6709,
+      "domainRejected": 3063,
+      "maxTemperatureErrorK": 0.13944616626213246,
+      "maxPressureErrorPercent": 0.4804478198799256,
+      "maxEnthalpyErrorPercent": 48.25437159643408,
+      "maxEnthalpyErrorJkg": 711.9155290098861,
+      "worstTemperatureState": {
+        "kind": "srho",
+        "a": 6290.0,
+        "b": 96.46616199111998,
+        "set": "cell-centres"
+      }
+    },
+    "srho/random-off-grid": {
+      "queries": 5000,
+      "accepted": 2225,
+      "phaseRejected": 1625,
+      "domainRejected": 1150,
+      "maxTemperatureErrorK": 0.13362476488237007,
+      "maxPressureErrorPercent": 0.35864012565673953,
+      "maxEnthalpyErrorPercent": 10.174891199876345,
+      "maxEnthalpyErrorJkg": 642.8078626911156,
+      "worstTemperatureState": {
+        "kind": "srho",
+        "a": 6247.475291280862,
+        "b": 96.40888125315308,
+        "set": "random-off-grid"
+      }
+    },
+    "hp/cell-centres": {
+      "queries": 31950,
+      "accepted": 24468,
+      "phaseRejected": 6891,
+      "domainRejected": 591,
+      "maxTemperatureErrorK": 0.03206908423180721,
+      "maxPressureErrorPercent": 0,
+      "maxEnthalpyErrorPercent": 0,
+      "maxEnthalpyErrorJkg": 0,
+      "worstTemperatureState": {
+        "kind": "hp",
+        "a": 482511.73708920187,
+        "b": 97200858.33328006,
+        "set": "cell-centres"
+      }
+    },
+    "hp/random-off-grid": {
+      "queries": 5000,
+      "accepted": 3871,
+      "phaseRejected": 1036,
+      "domainRejected": 93,
+      "maxTemperatureErrorK": 0.03215183017113077,
+      "maxPressureErrorPercent": 0,
+      "maxEnthalpyErrorPercent": 0,
+      "maxEnthalpyErrorJkg": 0,
+      "worstTemperatureState": {
+        "kind": "hp",
+        "a": 361201.43088337174,
+        "b": 97328844.074312,
+        "set": "random-off-grid"
+      }
+    },
+    "trho/initial-states": {
+      "queries": 35,
+      "accepted": 35,
+      "phaseRejected": 0,
+      "domainRejected": 0,
+      "maxTemperatureErrorK": 0,
+      "maxPressureErrorPercent": 0.12462008545053305,
+      "maxEnthalpyErrorPercent": 0.023838430078315653,
+      "maxEnthalpyErrorJkg": 109.41371404263191
+    },
+    "srho/blowdown-paths": {
+      "queries": 385,
+      "accepted": 275,
+      "phaseRejected": 99,
+      "domainRejected": 11,
+      "maxTemperatureErrorK": 0.0581616359841064,
+      "maxPressureErrorPercent": 0.23435711409593996,
+      "maxEnthalpyErrorPercent": 2.5412688865509403,
+      "maxEnthalpyErrorJkg": 373.6172684818739,
+      "worstTemperatureState": {
+        "kind": "srho",
+        "a": 5747.30433968244,
+        "b": 49.5,
+        "set": "blowdown-paths"
+      }
+    },
+    "hp/regulator-paths": {
+      "queries": 491,
+      "accepted": 468,
+      "phaseRejected": 23,
+      "domainRejected": 0,
+      "maxTemperatureErrorK": 0.026606301242154018,
+      "maxPressureErrorPercent": 0,
+      "maxEnthalpyErrorPercent": 0,
+      "maxEnthalpyErrorJkg": 0,
+      "worstTemperatureState": {
+        "kind": "hp",
+        "a": 83948.49208934311,
+        "b": 2000000.0,
+        "set": "regulator-paths"
+      }
+    },
+    "chain/blowdown-plus-regulator": {
+      "queries": 491,
+      "accepted": 468,
+      "phaseRejected": 23,
+      "domainRejected": 0,
+      "maxTemperatureErrorK": 0.34734710887471465,
+      "maxPressureErrorPercent": 0,
+      "maxEnthalpyErrorPercent": 0,
+      "maxEnthalpyErrorJkg": 0,
+      "worstTemperatureState": {
+        "kind": "chain",
+        "a": 4170.571178488074,
+        "b": 866.25,
+        "pressure": 2000000.0,
+        "set": "blowdown-plus-regulator"
+      }
+    },
+    "thermalpath/initial-inversion-plus-blowdown-plus-regulator": {
+      "queries": 491,
+      "accepted": 468,
+      "phaseRejected": 23,
+      "domainRejected": 0,
+      "maxTemperatureErrorK": 0.28536436263289033,
+      "maxPressureErrorPercent": 0,
+      "maxEnthalpyErrorPercent": 0,
+      "maxEnthalpyErrorJkg": 0,
+      "worstTemperatureState": {
+        "kind": "thermalpath",
+        "a": 308.15,
+        "b": 875,
+        "fraction": 0.99,
+        "pressure": 2000000.0,
+        "set": "initial-inversion-plus-blowdown-plus-regulator"
+      }
+    }
+  },
+  "acceptedPhaseMismatches": [],
+  "fixedStates": [
+    {
+      "label": "fill 20 C",
+      "kind": "trho",
+      "a": 293.15,
+      "b": 416.6666666666667,
+      "lookup": {
+        "phaseLimited": false,
+        "invalidState": false,
+        "temperature": 293.15,
+        "pressure": 49260844.8054228,
+        "enthalpy": 263290.9361242792,
+        "heatPerKg": 187461.91119857287,
+        "entropy": 4796.046496374182,
+        "density": 416.6666666666667,
+        "Z": 1.3587939407790732
+      }
+    },
+    {
+      "label": "20 C initial / 130 kg left",
+      "kind": "srho",
+      "a": 4796.113643407358,
+      "b": 216.66666666666669,
+      "lookup": {
+        "phaseLimited": false,
+        "invalidState": false,
+        "temperature": 191.2866496576776,
+        "pressure": 9963728.985385738,
+        "enthalpy": 143844.17803816145,
+        "heatPerKg": 86973.1165753757,
+        "entropy": 4796.113643407358,
+        "density": 216.66666666666669,
+        "Z": 0.8099823331338938
+      }
+    },
+    {
+      "label": "20 C initial / 117 kg left",
+      "kind": "srho",
+      "a": 4796.113643407358,
+      "b": 195.0,
+      "lookup": {
+        "phaseLimited": false,
+        "invalidState": false,
+        "temperature": 180.6670470289769,
+        "pressure": 8141615.551229379,
+        "enthalpy": 134996.22580047153,
+        "heatPerKg": 79546.47005125809,
+        "entropy": 4796.113643407358,
+        "density": 195,
+        "Z": 0.778623372950332
+      }
+    },
+    {
+      "label": "20 C initial / 90 kg left",
+      "kind": "srho",
+      "a": 4796.113643407358,
+      "b": 150.0,
+      "lookup": {
+        "phaseLimited": false,
+        "invalidState": false,
+        "temperature": 158.0704610535163,
+        "pressure": 5131084.3604378225,
+        "enthalpy": 117566.20959148099,
+        "heatPerKg": 65641.8569575344,
+        "entropy": 4796.113643407358,
+        "density": 150,
+        "Z": 0.7291175949890731
+      }
+    },
+    {
+      "label": "fill 35 C",
+      "kind": "trho",
+      "a": 308.15,
+      "b": 416.6666666666667,
+      "lookup": {
+        "phaseLimited": false,
+        "invalidState": false,
+        "temperature": 308.15,
+        "pressure": 53244656.90062399,
+        "enthalpy": 285079.3558447307,
+        "heatPerKg": 195738.96411678434,
+        "entropy": 4836.733672704719,
+        "density": 416.6666666666667,
+        "Z": 1.3971901180441153
+      }
+    },
+    {
+      "label": "35 C initial / 130 kg left",
+      "kind": "srho",
+      "a": 4836.794451916562,
+      "b": 216.66666666666669,
+      "lookup": {
+        "phaseLimited": false,
+        "invalidState": false,
+        "temperature": 201.04468014878233,
+        "pressure": 10922811.447367925,
+        "enthalpy": 156247.45064344013,
+        "heatPerKg": 90978.8608549333,
+        "entropy": 4836.794451916562,
+        "density": 216.66666666666669,
+        "Z": 0.8448510574539064
+      }
+    },
+    {
+      "label": "35 C initial / 117 kg left",
+      "kind": "srho",
+      "a": 4836.794451916562,
+      "b": 195.0,
+      "lookup": {
+        "phaseLimited": false,
+        "invalidState": false,
+        "temperature": 189.8180339171174,
+        "pressure": 8925152.246212445,
+        "enthalpy": 146546.88843962236,
+        "heatPerKg": 83112.71628202172,
+        "entropy": 4836.794451916562,
+        "density": 195,
+        "Z": 0.8124075555305368
+      }
+    },
+    {
+      "label": "35 C initial / 90 kg left",
+      "kind": "srho",
+      "a": 4836.794451916562,
+      "b": 150.0,
+      "lookup": {
+        "phaseLimited": false,
+        "invalidState": false,
+        "temperature": 165.90578805483284,
+        "pressure": 5616935.381528078,
+        "enthalpy": 127392.37126175052,
+        "heatPerKg": 68288.28769232148,
+        "entropy": 4836.794451916562,
+        "density": 150,
+        "Z": 0.7604611529726788
+      }
+    },
+    {
+      "label": "fill 40 C",
+      "kind": "trho",
+      "a": 313.15,
+      "b": 416.6666666666667,
+      "lookup": {
+        "phaseLimited": false,
+        "invalidState": false,
+        "temperature": 313.15,
+        "pressure": 54566305.69256705,
+        "enthalpy": 292322.66061801824,
+        "heatPerKg": 198478.56293880945,
+        "entropy": 4849.813001639449,
+        "density": 416.6666666666667,
+        "Z": 1.4090090422878927
+      }
+    },
+    {
+      "label": "40 C initial / 130 kg left",
+      "kind": "srho",
+      "a": 4849.902285770173,
+      "b": 216.66666666666669,
+      "lookup": {
+        "phaseLimited": false,
+        "invalidState": false,
+        "temperature": 204.32369184426364,
+        "pressure": 11244037.970093623,
+        "enthalpy": 160392.38472435935,
+        "heatPerKg": 92325.59493215973,
+        "entropy": 4849.902285770173,
+        "density": 216.66666666666669,
+        "Z": 0.8557400877955418
+      }
+    },
+    {
+      "label": "40 C initial / 117 kg left",
+      "kind": "srho",
+      "a": 4849.902285770173,
+      "b": 195.0,
+      "lookup": {
+        "phaseLimited": false,
+        "invalidState": false,
+        "temperature": 192.89632170783077,
+        "pressure": 9187721.633218328,
+        "enthalpy": 150406.92711453582,
+        "heatPerKg": 84316.89789513871,
+        "entropy": 4849.902285770173,
+        "density": 195,
+        "Z": 0.822961794434821
+      }
+    },
+    {
+      "label": "40 C initial / 90 kg left",
+      "kind": "srho",
+      "a": 4849.902285770173,
+      "b": 150.0,
+      "lookup": {
+        "phaseLimited": false,
+        "invalidState": false,
+        "temperature": 168.54917787264748,
+        "pressure": 5779874.3167504165,
+        "enthalpy": 130675.2224982552,
+        "heatPerKg": 69197.23150540423,
+        "entropy": 4849.902285770173,
+        "density": 150,
+        "Z": 0.7702485688341759
+      }
+    }
+  ],
+  "limitations": [
+    "Sampled error bounds are empirical, not a mathematical proof for every continuum state.",
+    "Relative enthalpy error becomes ill-conditioned near the arbitrary zero of enthalpy; absolute enthalpy error and chained regulator-temperature error are also reported.",
+    "Phase-boundary cells are conservatively rejected; the lookup does not solve two-phase nozzle flow.",
+    "The remaining-gas path is isentropic and regulator expansion is isenthalpic. Tank heat-transfer and component ratings remain assumptions."
+  ]
+}

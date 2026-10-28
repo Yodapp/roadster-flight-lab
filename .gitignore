@@ -1,0 +1,26 @@
+# Local machine and deployment metadata
+.DS_Store
+.openai/
+.env
+.env.*
+
+# Dependencies and Python environments
+node_modules/
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+
+# Temporary previews, logs and debugging output
+dist/_*-preview.html
+*.log
+*.tmp
+*.temp
+tmp/
+temp/
+coverage/
+.cache/
+debug-*.json
+debug-*.html
+debug-*.png
