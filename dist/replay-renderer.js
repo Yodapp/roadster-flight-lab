@@ -204,9 +204,52 @@ function plume(ctx,cam,start,end,force,index,time){
  for(let k=0;k<3;k++){const f=((time*1.8+k/3+index*.131)%1),alpha=(1-f)*.28;ctx.fillStyle=`rgba(178,245,255,${alpha})`;ctx.beginPath();ctx.ellipse(a[0]+dx*f,a[1]+dy*f,Math.max(.5,base*(.3+f)),Math.max(.4,base*.28),Math.atan2(dy,dx),0,TAU);ctx.fill();}
  ctx.restore();
 }
-function arrow(ctx,cam,a,b,stroke,title){
- const A=cam.V(a),B=cam.V(b);if(A[2]<cam.near||B[2]<cam.near)return;const p=cam.P(A),q=cam.P(B),angle=Math.atan2(q[1]-p[1],q[0]-p[0]);
- worldLine(ctx,cam,a,b,stroke,1.5);ctx.fillStyle=stroke;ctx.beginPath();ctx.moveTo(q[0],q[1]);ctx.lineTo(q[0]-8*Math.cos(angle-.42),q[1]-8*Math.sin(angle-.42));ctx.lineTo(q[0]-8*Math.cos(angle+.42),q[1]-8*Math.sin(angle+.42));ctx.closePath();ctx.fill();ctx.font='11px "IBM Plex Mono",monospace';ctx.fillText(title,q[0]+7,q[1]+3);
+function arrow(ctx,cam,a,b,stroke,title,settings={}){
+ const A=cam.V(a),B=cam.V(b);if(A[2]<cam.near||B[2]<cam.near)return;
+ const p=cam.P(A),q=cam.P(B),dx=q[0]-p[0],dy=q[1]-p[1],length=Math.hypot(dx,dy);
+ if(length<.01)return;
+ // A small screen-space floor keeps low-force direction markers visible. Thus
+ // lengths are illustrative, not a second calibrated force measurement.
+ if(length<(settings.minPixels??0)){const scale=settings.minPixels/length;q[0]=p[0]+dx*scale;q[1]=p[1]+dy*scale;}
+ const angle=Math.atan2(dy,dx),width=settings.width??1.5,head=settings.head??8;
+ ctx.save();ctx.lineCap='round';ctx.lineJoin='round';
+ ctx.beginPath();ctx.moveTo(p[0],p[1]);ctx.lineTo(q[0],q[1]);ctx.strokeStyle='rgba(3,11,18,.94)';ctx.lineWidth=width+3;ctx.stroke();ctx.strokeStyle=stroke;ctx.lineWidth=width;ctx.stroke();
+ ctx.beginPath();ctx.moveTo(q[0],q[1]);ctx.lineTo(q[0]-head*Math.cos(angle-.43),q[1]-head*Math.sin(angle-.43));ctx.lineTo(q[0]-head*Math.cos(angle+.43),q[1]-head*Math.sin(angle+.43));ctx.closePath();ctx.strokeStyle='rgba(3,11,18,.94)';ctx.lineWidth=2.5;ctx.stroke();ctx.fillStyle=stroke;ctx.fill();
+ if(settings.labels)settings.labels.push({x:q[0],y:q[1],dx,dy,title,color:stroke,priority:settings.priority??0,strong:settings.strong??false});
+ else {ctx.font='11px "IBM Plex Mono",monospace';ctx.fillText(title,q[0]+7,q[1]+3);}
+ ctx.restore();
+}
+
+function forceLabels(ctx,labels,w,h,compact){
+ // Keep labels out of each other's way, adding short leaders back to arrow tips.
+ // Restrict desktop callouts to the open center between the two HUD columns.
+ const left=compact?10:Math.min(235,w*.2),right=compact?w-10:w-Math.min(200,w*.17);
+ const top=compact?130:90,bottom=Math.max(top+55,h-(compact?115:100)),placed=[];
+ const font=compact?10:11;
+ ctx.save();
+ for(const item of labels.sort((a,b)=>b.priority-a.priority)){
+  const size=item.strong?font+1:font,boxW=Math.min(right-left,item.title.length*size*.61+14),boxH=size+10;
+  const preferred=item.dx<0?item.x-boxW-12:item.x+12;
+  let chosen;
+  const offsets=[0,-22,22,-44,44,-66,66,-88,88,-110,110,-132,132,-154,154];
+  for(const delta of offsets){
+   for(const x0 of [preferred,item.dx<0?item.x+12:item.x-boxW-12]){
+    const box={x:clamp(x0,left,right-boxW),y:clamp(item.y-boxH/2+delta,top,bottom-boxH),w:boxW,h:boxH};
+    if(!placed.some(b=>box.x<b.x+b.w+5&&box.x+box.w+5>b.x&&box.y<b.y+b.h+4&&box.y+box.h+4>b.y)){chosen=box;break;}
+   }
+   if(chosen)break;
+  }
+  // If an extreme camera/framing leaves no room, arrows still communicate each
+  // force; skip only the obstructed small callout rather than stack unreadable text.
+  if(!chosen)continue;
+  placed.push(chosen);
+  const tx=clamp(item.x,chosen.x,chosen.x+chosen.w),ty=clamp(item.y,chosen.y,chosen.y+chosen.h);
+  ctx.globalAlpha=.65;ctx.strokeStyle=item.color;ctx.lineWidth=.8;ctx.beginPath();ctx.moveTo(item.x,item.y);ctx.lineTo(tx,ty);ctx.stroke();ctx.globalAlpha=1;
+  ctx.fillStyle='rgba(5,16,25,.9)';ctx.fillRect(chosen.x,chosen.y,chosen.w,chosen.h);
+  ctx.strokeStyle=item.color;ctx.globalAlpha=item.strong?.75:.4;ctx.lineWidth=1;ctx.strokeRect(chosen.x,chosen.y,chosen.w,chosen.h);ctx.globalAlpha=1;
+  ctx.fillStyle=item.color;ctx.font=`${item.strong?'600 ':''}${size}px "IBM Plex Mono",monospace`;ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText(item.title,chosen.x+7,chosen.y+chosen.h/2+.5);
+ }
+ ctx.restore();
 }
 
 export function renderReplay(ctx,w,h,{result,unpowered,sample:s,time=0,options={}}){
@@ -271,9 +314,21 @@ export function renderReplay(ctx,w,h,{result,unpowered,sample:s,time=0,options={
     forceArrow(W([.6,-.75,0]),up,Math.max(0,s.normalForce??0),'#a5edba','Reaction');
     forceArrow(W([1.3,-.75,-.3]),forward,Math.max(0,s.drivingForce??0),'#f4d88b','Wheel');
    }else{
-    arrow(ctx,cam,center,add(center,[0,0,-2.7]),'#dfb18c','mg');
-    const force=[0,0,0];for(let i=0;i<NOZZLES.length;i++){const direction=rotate(s.q,NOZZLES[i].d);for(let k=0;k<3;k++)force[k]+=direction[k]*(s.forces?.[i]??0);}
-    if(Math.hypot(...force)>100)arrow(ctx,cam,center,add(center,mul(force,3/Math.max(25000,Math.hypot(...force)))),'#a1eef5','ΣF');
+    const force=[0,0,0],labels=[],scale=1/18000,cap=4.5;
+    const visualLength=magnitude=>Math.min(cap,magnitude*scale);
+    for(let i=0;i<NOZZLES.length;i++){
+     const n=NOZZLES[i],magnitude=Math.max(0,s.forces?.[i]??0),direction=rotate(s.q,n.d);
+     for(let k=0;k<3;k++)force[k]+=direction[k]*magnitude;
+     if(magnitude<=100)continue;
+     const origin=W(n.r),name=i<4?'U'+(i+1):i<8?'R'+(i-3):'S'+(i-7);
+     // Gold arrows point in the reaction-force direction, opposite cyan exhaust.
+     arrow(ctx,cam,origin,add(origin,mul(direction,visualLength(magnitude))),'#f9d98c',`${name} ${(magnitude/1000).toFixed(1)} kN`,{width:2,minPixels:cam.compact?18:24,head:8,labels,priority:magnitude/1e6});
+    }
+    const weight=(p.mass-p.gas+s.gas)*9.80665;
+    arrow(ctx,cam,center,add(center,[0,0,-visualLength(weight)]),'#d5b69c',`GRAVITY ${(weight/1000).toFixed(1)} kN`,{width:1.8,minPixels:20,labels,priority:2});
+    const net=Math.hypot(...force);
+    if(net>100)arrow(ctx,cam,center,add(center,mul(force,visualLength(net)/net)),'#a8f4ff',`NET THRUST ${(net/1000).toFixed(1)} kN`,{width:3,minPixels:cam.compact?34:44,head:11,labels,priority:3,strong:true});
+    forceLabels(ctx,labels,w,h,cam.compact);
    }
   }
  }
