@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Generate and independently validate the browser's nitrogen reference tables.
+"""Generate and independently validate the browser's reference tables.
+
+Default fluid is Nitrogen (original). `--fluid Air` writes dist/reference-eos-tables-air.json
+(Grok fork: the reported Tesla gas is compressed air; CoolProp pseudo-pure Air, Lemmon et al. 2000).
 
 Requires CoolProp==8.0.0 (generation only), and Node for validation of the exact
 shipping JavaScript interpolator. Run with the disposable reference-EOS venv.
@@ -17,11 +20,16 @@ import CoolProp
 import CoolProp.CoolProp as CP
 
 ROOT=Path(__file__).resolve().parent.parent
-TABLE=ROOT/'dist/reference-eos-tables.json'
-REPORT=ROOT/'reference-eos-validation.json'
-FLUID='Nitrogen'
+import sys as _sys
+FLUID='Air' if '--fluid' in _sys.argv and _sys.argv[_sys.argv.index('--fluid')+1].lower()=='air' else 'Nitrogen'
+SUFFIX='-air' if FLUID=='Air' else ''
+TABLE=ROOT/f'dist/reference-eos-tables{SUFFIX}.json'
+REPORT=ROOT/f'reference-eos-validation{SUFFIX}.json'
 STATE=CP.AbstractState('HEOS',FLUID)
 R=STATE.gas_constant()/STATE.molar_mass()
+JS_FLUID='air' if FLUID=='Air' else 'nitrogen'
+FLUID_META={'Nitrogen':dict(entropy=(3800,6300),enthalpy=(-150000,700000),equation='Span, Lemmon, Jacobsen, Wagner and Yokozeki (2000)',doi='https://doi.org/10.1063/1.1349047',doc='https://coolprop.org/fluid_properties/fluids/Nitrogen.html'),
+            'Air':dict(entropy=(1000,4900),enthalpy=(-60000,760000),equation='Lemmon, Jacobsen, Penoncello and Friend (2000), pseudo-pure air',doi='https://doi.org/10.1063/1.1285884',doc='https://coolprop.org/fluid_properties/fluids/Air.html')}[FLUID]
 GOOD_PHASES={CP.iphase_gas,CP.iphase_supercritical,CP.iphase_supercritical_gas}
 
 def line(a,b,n): return [a+(b-a)*i/(n-1) for i in range(n)]
@@ -57,16 +65,16 @@ def generate():
     assert CoolProp.__version__=='8.0.0',f'Pinned generation needs CoolProp 8.0.0; got {CoolProp.__version__}'
     # Fine log-density intervals at the dense fill states; low-density cold
     # blowdown is mostly phase-limited, but still explicitly represented.
-    entropy=line(3800,6300,126)
+    entropy=line(*FLUID_META['entropy'],126)
     logrho=logline(.1,10,49)[:-1]+logline(10,100,33)[:-1]+logline(100,1000,137)
-    enthalpy=line(-150000,700000,214)
+    enthalpy=line(*FLUID_META['enthalpy'],214)
     logpressure=logline(20000,100000000,151)
     table={'metadata':{
-        'schema':1,'fluid':'Nitrogen','backend':'HEOS','CoolPropVersion':CoolProp.__version__,
+        'schema':1,'fluid':FLUID,'backend':'HEOS','CoolPropVersion':CoolProp.__version__,
         'CoolPropGitRevision':CP.get_global_param_string('gitrevision'),'gasConstant':R,
-        'referenceEquation':'Span, Lemmon, Jacobsen, Wagner and Yokozeki (2000)',
-        'referenceDOI':'https://doi.org/10.1063/1.1349047',
-        'documentation':'https://coolprop.org/fluid_properties/fluids/Nitrogen.html',
+        'referenceEquation':FLUID_META['equation'],
+        'referenceDOI':FLUID_META['doi'],
+        'documentation':FLUID_META['doc'],
         'interpolation':'Bilinear in (specific entropy, log density) and (specific enthalpy, log absolute pressure). No extrapolation.',
         'units':{'entropy':'J/(kg K)','density':'kg/m³','temperature':'K','pressure':'Pa','enthalpy':'J/kg','heatPerKg':'J/kg'},
         'domain':{'entropy_J_kgK':[entropy[0],entropy[-1]],'density_kg_m3':[.1,1000],
@@ -111,8 +119,9 @@ def validate(table):
                             cases.append({'kind':'thermalpath','a':c+273.15,'b':rho,'fraction':f,'pressure':pressure,'set':'initial-inversion-plus-blowdown-plus-regulator'})
     node="""import {referenceAtSRho,referenceAtHP,referenceAtTRho} from './dist/reference-eos.js';
 let input='';for await(const c of process.stdin)input+=c;
-const calls={srho:referenceAtSRho,hp:referenceAtHP,trho:referenceAtTRho};
-console.log(JSON.stringify(JSON.parse(input).map(c=>{if(c.kind==='thermalpath'){const start=referenceAtTRho(c.a,c.b);if(start.invalidState||start.phaseLimited)return start;const tank=referenceAtSRho(start.entropy,c.b*c.fraction);return tank.invalidState||tank.phaseLimited?tank:referenceAtHP(tank.enthalpy,c.pressure);}if(c.kind!=='chain')return calls[c.kind](c.a,c.b);const tank=referenceAtSRho(c.a,c.b);return tank.invalidState||tank.phaseLimited?tank:referenceAtHP(tank.enthalpy,c.pressure);})));"""
+const F='__FLUID__';const calls={srho:(a,b)=>referenceAtSRho(a,b,F),hp:(a,b)=>referenceAtHP(a,b,F),trho:(a,b)=>referenceAtTRho(a,b,F)};
+console.log(JSON.stringify(JSON.parse(input).map(c=>{if(c.kind==='thermalpath'){const start=calls.trho(c.a,c.b);if(start.invalidState||start.phaseLimited)return start;const tank=calls.srho(start.entropy,c.b*c.fraction);return tank.invalidState||tank.phaseLimited?tank:calls.hp(tank.enthalpy,c.pressure);}if(c.kind!=='chain')return calls[c.kind](c.a,c.b);const tank=calls.srho(c.a,c.b);return tank.invalidState||tank.phaseLimited?tank:calls.hp(tank.enthalpy,c.pressure);})));"""
+    node=node.replace('__FLUID__',JS_FLUID)
     actual=json.loads(subprocess.run(['node','--input-type=module','-e',node],input=json.dumps(cases),text=True,capture_output=True,check=True,cwd=ROOT).stdout)
     summary={}
     bad_accepted=[]
@@ -171,6 +180,6 @@ console.log(JSON.stringify(JSON.parse(input).map(c=>{if(c.kind==='thermalpath'){
     print(f'Validated {len(cases):,} points; all accepted sampled T errors <1 K and p errors <1%.',flush=True)
 
 if __name__=='__main__':
-    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--validate-only',action='store_true');args=parser.parse_args()
+    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--validate-only',action='store_true');parser.add_argument('--fluid',default='Nitrogen');args=parser.parse_args()
     table=json.loads(TABLE.read_text()) if args.validate_only else generate()
     validate(table)

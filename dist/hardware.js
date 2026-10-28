@@ -17,6 +17,10 @@ export function regulatorSettings(p={}) {
   return {regulatorBar,deliveryLossPercent,setpointPressure:regulatorBar*1e5,deliveryFraction:1-deliveryLossPercent/100};
 }
 /** Hydraulic feed comparison; the optimistic mode preserves the v4.2 upper bound. */
+/** Grok fork: 'air' selects CoolProp reference air tables (reported Tesla gas); 'reference' keeps the original nitrogen tables. */
+export const AIR_REFERENCE_R=287.0491267875601;
+export function referenceFluid(p={}){return p.gasModel==='air'?'air':'nitrogen';}
+export function gasConstant(p={}){return p.realGas?(p.gasModel==='air'?AIR_REFERENCE_R:N2.R):AIR.R;}
 export function validateFeedModel(p={}) {
  const mode=p.feedModel===undefined?'consistent':p.feedModel;
  if(!['consistent','optimistic'].includes(mode))throw new RangeError('Feed model must be consistent or optimistic');
@@ -32,11 +36,11 @@ function regulatedTemperature(T,rho,pressure,feedPressure){if(pressure<=feedPres
 const curves=new Map();
 function curve(p){
   const vol=(p.tankVolume??600)/1000, ambient=atmosphere(p),regulator=regulatorSettings(p);
-  const reference=p.realGas&&p.gasModel!=='pr';
-  if(p.realGas&&!['reference','pr'].includes(p.gasModel??'reference'))throw new RangeError('Nitrogen gas model must be reference or pr.');
+  const reference=p.realGas&&p.gasModel!=='pr',fluid=referenceFluid(p);
+  if(p.realGas&&!['reference','pr','air'].includes(p.gasModel??'reference'))throw new RangeError('Gas model must be reference (nitrogen), air or pr.');
   const key=[p.gas,vol,!!p.realGas,p.gasModel??'reference',!!p.blowdown,ambient.T,ambient.p,regulator.regulatorBar,regulator.deliveryLossPercent].join('/');
   if(curves.has(key))return curves.get(key);
-  const start=reference?referenceAtTRho(ambient.T,p.gas/vol):p.realGas?nitrogenPR(ambient.T,p.gas/vol):null,rows=[];
+  const start=reference?referenceAtTRho(ambient.T,p.gas/vol,fluid):p.realGas?nitrogenPR(ambient.T,p.gas/vol):null,rows=[];
   for(let i=0;i<=256;i++){
     const f=.01+.99*i/256,gas=p.gas*f,rho=gas/vol;
     let T=ambient.T*(p.blowdown?f**.4:1);
@@ -46,10 +50,10 @@ function curve(p){
         T=bound(T-error/(state.cv*N2.M/Math.max(64,T)),64,600);
       }
     }
-    const state=reference?(start.invalidState?start:p.blowdown?referenceAtSRho(start.entropy,rho):referenceAtTRho(ambient.T,rho)):p.realGas?nitrogenPR(T,rho):{pressure:rho*AIR.R*T,Z:1};
+    const state=reference?(start.invalidState?start:p.blowdown?referenceAtSRho(start.entropy,rho,fluid):referenceAtTRho(ambient.T,rho,fluid)):p.realGas?nitrogenPR(T,rho):{pressure:rho*AIR.R*T,Z:1};
     if(reference)T=state.temperature;
     const pressure=Math.max(0,state.pressure),feedPressure=Math.max(ambient.p,Math.min(regulator.setpointPressure,pressure)*regulator.deliveryFraction);
-    const outlet=reference&&!state.invalidState&&!state.phaseLimited?referenceAtHP(state.enthalpy,feedPressure):null;
+    const outlet=reference&&!state.invalidState&&!state.phaseLimited?referenceAtHP(state.enthalpy,feedPressure,fluid):null;
     const invalidState=!!state.invalidState||!!outlet?.invalidState;
     const feedT=reference?(outlet?.temperature??T):p.realGas?regulatedTemperature(T,rho,pressure,feedPressure):T;
     // A rigid tank held isothermal needs Qdot = mdot * (T/rho) (dp/dT)_rho.
@@ -72,15 +76,15 @@ export function gasState(p,gas){
     // The PR covolume is an EOS domain boundary, not a usable tank density.
     return {temperature:ambient.T,pressure:Infinity,Z:Infinity,feedTemperature:ambient.T,
       feedPressure:ambient.p,phaseLimited:false,invalidState:true,initialPressure:Infinity,
-      R:N2.R,exhaust:0,capacity:0,heatPerKg:0,...diagnostics,belowRegulatorSetpoint:false};
+      R:gasConstant(p),exhaust:0,capacity:0,heatPerKg:0,...diagnostics,belowRegulatorSetpoint:false};
   }
   if(!(p.gas>0)||!(gas>0))return {temperature:ambient.T,pressure:0,Z:1,feedTemperature:ambient.T,
-    feedPressure:ambient.p,phaseLimited:false,initialPressure:0,R:p.realGas?N2.R:AIR.R,exhaust:0,capacity:0,heatPerKg:0,...diagnostics,belowRegulatorSetpoint:true};
+    feedPressure:ambient.p,phaseLimited:false,initialPressure:0,R:gasConstant(p),exhaust:0,capacity:0,heatPerKg:0,...diagnostics,belowRegulatorSetpoint:true};
   const rows=curve(p),f=bound((gas/p.gas-.01)/.99*256,0,256),i=Math.min(255,Math.floor(f)),a=rows[i],z=rows[i+1],q=f-i,state={};
   for(const k of ['temperature','pressure','Z','feedTemperature','feedPressure','heatPerKg'])state[k]=a[k]+(z[k]-a[k])*q;
   state.phaseLimited=(q<1-1e-12&&a.phaseLimited)||(q>1e-12&&z.phaseLimited);
   state.invalidState=rows[256].invalidState||(q<1-1e-12&&a.invalidState)||(q>1e-12&&z.invalidState);
-  state.initialPressure=rows[256].invalidState?Infinity:rows[256].pressure;state.R=p.realGas?N2.R:AIR.R;
+  state.initialPressure=rows[256].invalidState?Infinity:rows[256].pressure;state.R=gasConstant(p);
   state.exhaust=Math.min(p.exhaust*Math.sqrt(state.feedTemperature/AIR.T),.95*Math.sqrt(Math.max(0,2*(state.R*3.5)*state.feedTemperature*(1-(ambient.p/Math.max(ambient.p,state.feedPressure))**(2/7)))));
   if(gas<=p.gas*.01||state.phaseLimited||state.invalidState||state.pressure<=ambient.p){state.exhaust=0;state.feedPressure=ambient.p;}
   // Legacy 2D benchmark scaling only; 3D uses explicit throat and feed restrictions.

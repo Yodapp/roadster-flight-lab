@@ -1,11 +1,15 @@
-/** Nitrogen HEOS lookup, generated with pinned CoolProp. No runtime property server.
+/** Nitrogen (original) and air (Grok fork) HEOS lookups, generated with pinned CoolProp. No runtime property server.
+ * Every exported function takes an optional final `fluid` argument: 'nitrogen' (default) or 'air'.
  * Bilinear in (s, log rho) and (h, log p); never extrapolates. Any contributing
  * two-phase/liquid/invalid vertex rejects the cell rather than bridging saturation.
  */
-import tables from './reference-eos-tables.json' with {type:'json'};
+import nitrogenTables from './reference-eos-tables.json' with {type:'json'};
+import airTables from './reference-eos-tables-air.json' with {type:'json'};
 
-export const referenceEOSMetadata=Object.freeze(tables.metadata);
-const R=tables.metadata.gasConstant;
+const TABLES={nitrogen:nitrogenTables,air:airTables};
+function tablesFor(fluid='nitrogen'){const t=TABLES[fluid];if(!t)throw new RangeError('Reference fluid must be nitrogen or air');return t;}
+export const referenceEOSMetadata=Object.freeze(nitrogenTables.metadata);
+export const referenceEOSMetadataByFluid=Object.freeze({nitrogen:Object.freeze(nitrogenTables.metadata),air:Object.freeze(airTables.metadata)});
 function bracket(axis,x){
  if(!Number.isFinite(x)||x<axis[0]||x>axis.at(-1))return null;
  let lo=0,hi=axis.length-1;
@@ -27,8 +31,9 @@ function interpolate(grid,x,y,{inspectPhase=true}={}){
  return out;
 }
 /** Entropy J/(kg K), density kg/m³. */
-export function referenceAtSRho(entropy,density){
+export function referenceAtSRho(entropy,density,fluid='nitrogen'){
  if(!(density>0))return invalid('Density must be finite and positive.');
+ const tables=tablesFor(fluid),R=tables.metadata.gasConstant;
  const out=interpolate(tables.srho,entropy,Math.log(density));
  return {...out,entropy,density,Z:out.pressure/(density*R*out.temperature)};
 }
@@ -37,9 +42,9 @@ export function referenceAtSRho(entropy,density){
  * The entropy scan runs while constructing cached gas curves: once at the fill
  * state, and at each isothermal curve row. It is not a flight-timestep scan.
  */
-export function referenceAtTRho(temperature,density){
+export function referenceAtTRho(temperature,density,fluid='nitrogen'){
  if(!Number.isFinite(temperature)||!(temperature>0)||!(density>0)||!Number.isFinite(density))return invalid('Temperature and density must be finite and positive.');
- const y=Math.log(density),grid=tables.srho;
+ const y=Math.log(density),grid=tablesFor(fluid).srho;
  if(!bracket(grid.y,y))return invalid('Density outside the shipped reference-table domain.');
  let previous=null;
  for(const s of grid.x){
@@ -47,17 +52,17 @@ export function referenceAtTRho(temperature,density){
   if(!state.invalidState&&Number.isFinite(state.temperature)){
    if(previous&&previous.temperature<=temperature&&state.temperature>=temperature){
     const entropy=previous.s+(s-previous.s)*(temperature-previous.temperature)/(state.temperature-previous.temperature);
-    const result=referenceAtSRho(entropy,density);
+    const result=referenceAtSRho(entropy,density,fluid);
     return {...result,temperature};
    }
-   if(state.temperature===temperature)return referenceAtSRho(s,density);
+   if(state.temperature===temperature)return referenceAtSRho(s,density,fluid);
    previous={s,temperature:state.temperature};
   }else previous=null;
  }
  return invalid('Temperature/density state outside the shipped entropy-table domain.');
 }
 /** Enthalpy J/kg, absolute pressure Pa. */
-export function referenceAtHP(enthalpy,pressure){
+export function referenceAtHP(enthalpy,pressure,fluid='nitrogen'){
  if(!(pressure>0))return invalid('Pressure must be finite and positive.');
- return {...interpolate(tables.hp,enthalpy,Math.log(pressure)),enthalpy,pressure};
+ return {...interpolate(tablesFor(fluid).hp,enthalpy,Math.log(pressure)),enthalpy,pressure};
 }

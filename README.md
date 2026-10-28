@@ -1,3 +1,63 @@
+# Grok fork: "Real demo, real stunt, not real flight"
+
+**Live site:** https://yodapp.github.io/roadster-flight-lab/ (Swedish first, English toggle)  
+**Anders' full simulator, Grok-tuned:** https://yodapp.github.io/roadster-flight-lab/dist/
+
+## Credits and permission
+
+The original **Roadster Flight Lab** was created by **Anders Bjarby**:
+
+- Repository: https://github.com/fltman/roadster-flight-lab
+- Live site: https://bjarby.com/roadster/
+
+This fork is modified and published **with Anders' permission**. He confirmed this in writing ("helt ok"). The original repository has no license file, and this fork **does not add one on his behalf**. All rights to the original work remain with Anders Bjarby.
+
+## What this fork adds
+
+1. **A verdict-first landing page** (`index.html`, `grok/`):
+   - The answer up front: real demo, real stunt, not real flight.
+   - The key numbers:
+     - 250 kg of air in 600 L ≈ 437 bar.
+     - One charge gives ≈ 90 kN·s, or ≈ 1.1 s at 80 kN.
+     - 80 kN × 5.5 s would need ≈ 810–990 kg of air.
+2. **All four stunts in a three.js 3D view.** three.js loads from a CDN and lazily, so the numbers render first. The stunts are:
+   - the ramp flip
+   - the no-ramp kickflip over five vehicles
+   - the vertical hop
+   - 0–60 mph in 0.81 s
+
+   Each stunt shows its gas cost against the 250 kg budget and has adjustable assumptions.
+3. **An interactive impulse-budget gauge.** Thrust × seconds sliders show why "80 kN for 5–6 s" does not fit in one charge.
+4. **Real air instead of nitrogen.** This follows Musk ("ultra high-pressure air") and Car and Driver ("250 kilos of compressed air"). The details:
+   - New CoolProp 8 tables for air: `dist/reference-eos-tables-air.json`, built with `scripts/build-reference-tables.py --fluid Air`, plus the validation file `reference-eos-validation-air.json`.
+   - A 19 kB blowdown table for the landing page: `grok/air-tables.js`, built by `scripts/build-grok-air-tables.py`.
+   - Nitrogen (the original choice) is still selectable in the simulator.
+5. **Sensible, transparent and adjustable landing limits in Anders' simulator.**
+   - A new "Landing limits" group and a *Realistic (Grok default) / Strict (original)* switch.
+   - The original 1.5 m/s touchdown screen is stricter than stepping off a kerb.
+   - With realistic limits (3 m/s vertical, 2 m/s sideways, 6 m/s longitudinal), his own model lands the ramp stunt using ≈ 133–143 kg of air.
+   - The physics `DEFAULTS` are unchanged, so every original regression test still runs against the original configuration.
+6. **Tests.** `tests/grok-physics.test.mjs` covers:
+   - the air EOS (≈ 437 bar)
+   - the impulse budget and the 80 kN × 5.5 s check
+   - each stunt model
+   - the animation timelines
+   - a cross-check against Anders' simulator
+
+   `npm test` runs 149 tests: 134 original and 15 new.
+
+Tesla figures are **claims** from the presentation and press. Grok's assumptions (mass 2,200 kg, nozzle models, heights and distances) are labelled on the page and can be adjusted.
+
+```sh
+npm test            # original + Grok tests
+npm run check       # syntax of dist/ and grok/
+npm run dev:grok    # serve the repo root → http://127.0.0.1:4173/ (landing page) and /dist/ (simulator)
+```
+
+---
+
+*Everything below is Anders Bjarby's original README.*
+
 # Roadster Flight Lab 4.4 — driven ramp and 3D flight
 
 Updated 28 October 2026. This independent model investigates the Roadster ramp stunt using assumed hardware and generic controls. It does not authenticate footage, reconstruct measured Tesla telemetry, or qualify a buildable vehicle.

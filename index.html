@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Grok-versionen · Kan Tesla Roadster flyga?</title>
+<meta name="description" content="Äkta demo, äkta stunt – inte äkta flygning. Grok räknar på Tesla Roadsters tryckluftsstunts. Bygger på Anders Bjarbys Roadster Flight Lab.">
+<meta property="og:title" content="Kan Tesla Roadster flyga? – Grok-versionen">
+<meta property="og:description" content="Äkta demo, äkta stunt – inte äkta flygning. 80 kN i 5–6 s skulle kräva ~900 kg luft; tanken rymmer 250 kg.">
+<meta name="theme-color" content="#0d0f13">
+<link rel="icon" href="dist/icon.svg">
+<link rel="stylesheet" href="grok/style.css">
+<link rel="modulepreload" href="grok/app.js">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.min.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="#verdict"><span class="logo">G</span><span><b>Roadster Flight Lab</b><small data-i18n="brand.sub">Grok-versionen av Roadster Flight Lab</small></span></a>
+  <nav class="links">
+    <a href="#stunts" data-i18n="nav.stunts">Stunts</a><a href="#gauge" data-i18n="nav.gauge">Impulsbudget</a><a href="#claims" data-i18n="nav.claims">Påståenden</a><a href="#lab" data-i18n="nav.lab">Simulatorn</a><a href="#sources" data-i18n="nav.sources">Källor</a>
+  </nav>
+  <div class="lang" role="group" aria-label="Language"><button data-lang="sv" aria-pressed="true">SV</button><button data-lang="en" aria-pressed="false">EN</button></div>
+</header>
+
+<main>
+<section id="verdict" class="hero">
+  <p class="kicker" data-i18n="hero.kicker">Grok-analys · oberoende fysikgranskning</p>
+  <h1 data-i18n="hero.title">Äkta demo. Äkta stunt.<br><em>Inte äkta flygning.</em></h1>
+  <p class="lead" data-i18n="hero.lead"></p>
+  <div class="keys">
+    <div class="key"><b id="k-p">437 bar</b><span data-i18n="k.p.label"></span></div>
+    <div class="key"><b id="k-i">≈ 90 kN·s</b><span data-i18n="k.i.label"></span></div>
+    <div class="key warn"><b id="k-t">≈ 1,1 s</b><span data-i18n="k.t.label"></span></div>
+    <div class="key bad"><b id="k-m">810–990 kg</b><span data-i18n="k.m.label"></span></div>
+  </div>
+  <p class="bottom" data-i18n="hero.bottom"></p>
+  <div class="cta"><a class="btn primary" href="#stunts" data-i18n="hero.cta1">Se de fyra stunten i 3D</a><a class="btn" href="#gauge" data-i18n="hero.cta2">Testa impulsbudgeten</a></div>
+  <p class="credit-line" data-i18n="credit.short"></p>
+</section>
+
+<section id="stunts">
+  <h2 data-i18n="stunts.title">Fyra stunts</h2>
+  <p class="sub" data-i18n="stunts.lead"></p>
+  <div class="tabs" role="tablist">
+    <button role="tab" data-stunt="ramp" aria-selected="true" data-i18n="s.ramp">Rampflip</button>
+    <button role="tab" data-stunt="kickflip" aria-selected="false" data-i18n="s.kickflip">Kickflip</button>
+    <button role="tab" data-stunt="hop" aria-selected="false" data-i18n="s.hop">Lodrät hopp</button>
+    <button role="tab" data-stunt="launch" aria-selected="false" data-i18n="s.launch">0–60 mph</button>
+  </div>
+  <div class="theatre-grid">
+    <div id="stage" class="stage">
+      <canvas id="theatre" aria-label="3D"></canvas>
+      <div id="stage-msg" class="stage-msg" data-i18n="loading3d">Laddar 3D …</div>
+      <div class="hud">
+        <div><small data-i18n="hud.time">Tid</small><b id="hud-time">0,0 s</b></div>
+        <div><small data-i18n="hud.height">Höjd</small><b id="hud-height">0 m</b></div>
+        <div><small data-i18n="hud.speed">Fart</small><b id="hud-speed">0</b></div>
+        <div class="gas"><small data-i18n="hud.gas">Gas kvar</small><b id="hud-gas">250 kg</b><span class="hudbar"><i id="hud-gasbar"></i></span></div>
+        <div class="phase"><b id="hud-phase"></b></div>
+      </div>
+      <div class="player">
+        <button id="play" class="btn small">▶</button><button id="replay" class="btn small" data-i18n="btn.replay">↺ Igen</button>
+        <input id="scrub" type="range" min="0" max="1000" value="0" aria-label="scrub">
+        <select id="rate" aria-label="speed"><option value="0.25">¼×</option><option value="0.5">½×</option><option value="1" selected>1×</option><option value="2">2×</option></select>
+        <span class="cams"><button class="btn small" data-cam="follow" aria-pressed="true" data-i18n="cam.follow">Följ</button><button class="btn small" data-cam="overview" aria-pressed="false" data-i18n="cam.overview">Översikt</button></span>
+      </div>
+    </div>
+    <div class="panel">
+      <h3 id="stunt-title"></h3>
+      <p id="stunt-desc" class="desc"></p>
+      <div id="stunt-result" class="result"></div>
+      <div id="stunt-controls" class="controls"></div>
+      <details class="common">
+        <summary><span data-i18n="p.mass">Bilens massa</span>, <span data-i18n="p.mode">Munstycken</span>, <span data-i18n="p.temp">Fyllnadstemp.</span></summary>
+        <label class="ctl"><span class="lbl"><span data-i18n="p.mass">Bilens massa</span> <b id="mass-v">2 200 kg</b></span><input id="mass" type="range" min="1800" max="2800" step="50" value="2200"></label>
+        <label class="ctl"><span class="lbl" data-i18n="p.mode">Munstycken</span>
+          <select id="mode"><option value="reg100" data-i18n="mode.reg100">Reglerat 100 bar</option><option value="sonic" selected data-i18n="mode.sonic">Oreglerat</option><option value="bell" data-i18n="mode.bell">Klockmunstycke</option></select></label>
+        <label class="ctl"><span class="lbl"><span data-i18n="p.temp">Fyllnadstemp.</span> <b id="temp-v">20 °C</b></span><input id="temp" type="range" min="-10" max="40" step="5" value="20"></label>
+      </details>
+    </div>
+  </div>
+  <div class="card all">
+    <h3 data-i18n="all.title">Alla fyra mot budgeten</h3>
+    <div id="all-stunts"></div>
+  </div>
+</section>
+
+<section id="gauge">
+  <h2 data-i18n="gauge.title">Impulsbudgeten</h2>
+  <p class="sub" data-i18n="gauge.lead"></p>
+  <div class="gauge-grid">
+    <div class="card dial">
+      <svg viewBox="0 0 200 118" role="img" aria-label="impulse gauge">
+        <path id="dial-ok" class="track ok" d=""/><path id="dial-bad" class="track bad" d=""/><path id="dial-val" class="val" d=""/>
+        <g id="budget-tick"><line x1="0" y1="0" x2="0" y2="0"/><text id="budget-label" x="0" y="0" text-anchor="middle"></text></g>
+        <text id="dial-text" x="100" y="90" text-anchor="middle" class="t1"></text>
+        <text id="dial-sub" x="100" y="114" text-anchor="middle" class="t2"></text>
+      </svg>
+      <p id="g-need" class="need"></p>
+      <p id="g-status"></p>
+      <p id="g-flow" class="small"></p>
+    </div>
+    <div class="card">
+      <label class="ctl"><span class="lbl"><span data-i18n="g.thrust">Dragkraft</span> <b id="g-thrust-v"></b></span><input id="g-thrust" type="range" min="5" max="120" step="1" value="80"></label>
+      <label class="ctl"><span class="lbl"><span data-i18n="g.seconds">Tid</span> <b id="g-sec-v"></b></span><input id="g-sec" type="range" min="0.1" max="8" step="0.1" value="5.5"></label>
+      <label class="ctl"><span class="lbl" data-i18n="p.mode">Munstycken</span>
+        <select id="g-mode"><option value="reg100" data-i18n="mode.reg100">Reglerat</option><option value="sonic" selected data-i18n="mode.sonic">Oreglerat</option><option value="bell" data-i18n="mode.bell">Klocka</option></select></label>
+      <label class="ctl"><span class="lbl"><span data-i18n="p.temp">Fyllnadstemp.</span> <b id="g-temp-v">20 °C</b></span><input id="g-temp" type="range" min="-10" max="40" step="5" value="20"></label>
+      <div class="presets">
+        <button class="btn small" data-preset="claim" data-i18n="g.preset.claim"></button>
+        <button class="btn small" data-preset="max" data-i18n="g.preset.max"></button>
+        <button class="btn small" data-preset="avg" data-i18n="g.preset.avg"></button>
+        <button class="btn small" data-preset="hover" data-i18n="g.preset.hover"></button>
+      </div>
+      <p class="small" data-i18n="g.explain"></p>
+    </div>
+  </div>
+</section>
+
+<section id="claims">
+  <h2 data-i18n="claims.title">Påstående för påstående</h2>
+  <p class="sub" data-i18n="claims.lead"></p>
+  <div class="table-wrap"><table class="claims">
+    <thead><tr><th data-i18n="th.claim"></th><th data-i18n="th.check"></th><th data-i18n="th.verdict"></th></tr></thead>
+    <tbody>
+      <tr><td><span data-i18n="c1"></span> <a class="src" href="https://carbuzz.com/2028-tesla-roadster-interior-exterior-gallery/">CarBuzz</a></td><td data-i18n="c1x"></td><td><span class="pill ok" data-i18n="v.ok"></span></td></tr>
+      <tr><td><span data-i18n="c2"></span> <a class="src" href="https://eu.usatoday.com/story/cars/news/2026/10/16/tesla-elon-musk-unveils-roadster-flying-car/92276476007/">USA Today</a></td><td data-i18n="c2x"></td><td><span class="pill stunt" data-i18n="v.stunt"></span></td></tr>
+      <tr><td><span data-i18n="c3"></span> <a class="src" href="https://www.roadandtrack.com/news/a74159440/tesla-roadster-flip-float-launch-control-0-60-mph-videos/">Road &amp; Track</a> <a class="src" href="https://www.caranddriver.com/news/a74165059/tesla-roadster-thrusters-fan-system-explained/">Car and Driver</a></td><td data-i18n="c3x"></td><td><span class="pill stunt" data-i18n="v.stunt"></span></td></tr>
+      <tr><td><span data-i18n="c4"></span></td><td data-i18n="c4x"></td><td><span class="pill stunt" data-i18n="v.stunt"></span></td></tr>
+      <tr><td><span data-i18n="c5"></span> <a class="src" href="https://electrek.co/2026/10/15/an-updated-technical-look-at-teslas-kick-flipping-0-60-in-1s-next-gen-roadster/">Electrek</a></td><td data-i18n="c5x"></td><td><span class="pill ok" data-i18n="v.ok"></span></td></tr>
+      <tr><td><span data-i18n="c6"></span> <a class="src" href="https://tech-insider.org/tesla-roadster-flight-tech-80kn-thrust-explained-2026/">tech-insider</a></td><td data-i18n="c6x"></td><td><span class="pill ok" data-i18n="v.ok"></span></td></tr>
+      <tr><td><span data-i18n="c7"></span> <a class="src" href="https://tech-insider.org/tesla-roadster-flight-tech-80kn-thrust-explained-2026/">tech-insider</a></td><td data-i18n="c7x"></td><td><span class="pill bad" data-i18n="v.bad"></span></td></tr>
+      <tr><td><span data-i18n="c8"></span> <a class="src" href="https://insideevs.com/news/812205/tesla-roadster-replenishes-air-tanks/">InsideEVs</a> <a class="src" href="https://www.caranddriver.com/news/a74165059/tesla-roadster-thrusters-fan-system-explained/">Car and Driver</a></td><td data-i18n="c8x"></td><td><span class="pill ok" data-i18n="v.ok"></span></td></tr>
+      <tr><td><span data-i18n="c9"></span> <a class="src" href="https://carbuzz.com/2028-tesla-roadster-interior-exterior-gallery/">CarBuzz</a></td><td data-i18n="c9x"></td><td><span class="pill bad" data-i18n="v.bad"></span></td></tr>
+      <tr><td><span data-i18n="c10"></span> <a class="src" href="https://flyingroadster.net/is-it-real/">flyingroadster.net</a></td><td data-i18n="c10x"></td><td><span class="pill bad" data-i18n="v.no"></span></td></tr>
+    </tbody>
+  </table></div>
+  <div class="card assume">
+    <h3 data-i18n="assume.title">Antaganden</h3>
+    <ul><li data-i18n="a1"></li><li data-i18n="a2"></li><li data-i18n="a3"></li><li data-i18n="a4"></li><li data-i18n="a5"></li><li data-i18n="a6"></li></ul>
+  </div>
+</section>
+
+<section id="lab">
+  <div class="card lab">
+    <h2 data-i18n="lab.title">Anders Bjarbys simulator</h2>
+    <p data-i18n="lab.lead"></p>
+    <ul><li data-i18n="lab.l1"></li><li data-i18n="lab.l2"></li></ul>
+    <div class="cta"><a class="btn primary" href="dist/" data-i18n="lab.open">Öppna simulatorn →</a><a class="btn" href="https://bjarby.com/roadster/" data-i18n="lab.orig">Anders original →</a></div>
+  </div>
+</section>
+
+<section id="sources">
+  <h2 data-i18n="src.title">Källor</h2>
+  <ul class="sources" id="source-list"></ul>
+</section>
+
+<footer id="credits">
+  <h3 data-i18n="credits.title">Tack &amp; upphov</h3>
+  <p data-i18n="credits.text"></p>
+  <p><a href="https://github.com/Yodapp/roadster-flight-lab" data-i18n="credits.code">Källkod</a> · Grok · 2026</p>
+</footer>
+</main>
+<script type="module" src="grok/sources.js"></script>
+<script type="module" src="grok/app.js"></script>
+</body>
+</html>
